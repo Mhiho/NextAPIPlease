@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  nextmio_db:
+    container_name: nextmio_db
+    image: postgres:13.3
+    environment: 
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DATABASE}
+    volumes:
+      - ./mio-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+volumes:
+  nextmio-data:
