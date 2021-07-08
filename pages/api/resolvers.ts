@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { secret } from '../../config';
 import { v4 as uuidv4 }from 'uuid';
-import getUserId from './utils/getUserId';
+import getUser from './utils/getUser';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -30,7 +29,7 @@ export const user = {
                 }
             })
         
-            const tok : string = jwt.sign({ userId: user.id }, secret)
+            const tok : string = jwt.sign({ userId: user.id }, process.env.JWT_SECRET)
          
             const token = await prisma.token.create({ data: {
                 token: tok,
@@ -60,19 +59,22 @@ export const user = {
             if (!isMatch) {
                 throw new Error('Unable to login')
             }
-            const token : string = jwt.sign({ userId: user.id }, secret)
+            const tok : string = jwt.sign({ userId: user.id }, process.env.JWT_SECRET)
 
-            const tokenObj : any = await prisma.token.create({ data: {
-                token: token,
+            const token : any = await prisma.token.create({ data: {
+                token: tok,
                 userId: user.id
             } })
             return {
-                tokenObj
+                token
             }
           },
           createPoem: async(parent, args, context , info) => {
-              const userId = await getUserId(context)
-              console.log(userId)
+            
+                const token = context.req.headers.authorization || '';
+        
+                const user = getUser(token)
+                console.log(user);
           }
         }
     }
